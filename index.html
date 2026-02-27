@@ -1,1 +1,520 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Kasir + Scan Harga</title>
+  <style>
+    body{font-family:system-ui,Arial;margin:0;background:#0b0f14;color:#e8eef7}
+    header{padding:14px 16px;background:#121a24;position:sticky;top:0}
+    .wrap{max-width:980px;margin:0 auto;padding:14px 16px}
+    .grid{display:grid;gap:12px}
+    @media(min-width:900px){.grid{grid-template-columns:1.2fr .8fr}}
+    .card{background:#121a24;border:1px solid #203040;border-radius:12px;padding:12px}
+    input,button,select{width:100%;padding:10px;border-radius:10px;border:1px solid #2a3c51;background:#0b0f14;color:#e8eef7}
+    button{cursor:pointer}
+    button.primary{background:#1b5cff;border-color:#1b5cff}
+    button.danger{background:#ff2d55;border-color:#ff2d55}
+    .row{display:flex;gap:8px;align-items:center}
+    .row > *{flex:1}
+    table{width:100%;border-collapse:collapse}
+    th,td{padding:8px;border-bottom:1px solid #203040;font-size:14px}
+    .muted{color:#9fb2c9;font-size:12px}
+    .pill{display:inline-block;padding:2px 8px;border:1px solid #2a3c51;border-radius:999px;font-size:12px;color:#9fb2c9}
+    video{width:100%;border-radius:12px;background:#000}
+    .kiri{display:flex;gap:8px}
+    .kiri button{width:auto;white-space:nowrap}
+  </style>
+  <!-- QuaggaJS for barcode scanning -->
+  <script src="https://cdn.jsdelivr.net/npm/@ericblade/quagga2@1.8.4/dist/quagga.min.js"></script>
+</head>
+<body>
+  <header>
+    <div class="wrap">
+      <div class="row">
+        <div>
+          <div style="font-weight:700">Kasir + Scan Harga</div>
+          <div class="muted">Offline-first • Simpan produk & transaksi di browser</div>
+        </div>
+        <div class="row" style="gap:8px">
+          <span class="pill" id="dbStatus">DB: lokal</span>
+          <button id="btnReset" class="danger">Reset Demo</button>
+        </div>
+      </div>
+    </div>
+  </header>
 
+  <div class="wrap grid">
+    <!-- LEFT: Scan + Produk -->
+    <section class="card grid" style="gap:12px">
+      <div class="row">
+        <button id="btnStart" class="primary">Mulai Scan</button>
+        <button id="btnStop">Stop</button>
+      </div>
+
+      <div id="scanner" class="card" style="padding:8px">
+        <div class="muted">Arahkan kamera ke barcode (EAN/UPC). Pastikan cahaya cukup.</div>
+        <div id="scannerViewport"></div>
+      </div>
+
+      <div class="card">
+        <div style="font-weight:700;margin-bottom:6px">Tambah Produk / Update Harga</div>
+        <div class="row">
+          <input id="pBarcode" placeholder="Barcode (scan otomatis masuk sini)" />
+          <input id="pName" placeholder="Nama produk" />
+        </div>
+        <div class="row">
+          <input id="pPrice" placeholder="Harga (contoh: 12000)" inputmode="numeric" />
+          <input id="pStock" placeholder="Stok (opsional)" inputmode="numeric" />
+        </div>
+        <div class="row">
+          <button id="btnSaveProduct" class="primary">Simpan Produk</button>
+          <button id="btnAddToCart">Masukkan ke Keranjang</button>
+        </div>
+        <div class="muted">Tips: Scan barcode → isi nama & harga sekali → berikutnya tinggal scan untuk masuk keranjang.</div>
+      </div>
+
+      <div class="card">
+        <div style="font-weight:700;margin-bottom:6px">Cari Produk</div>
+        <input id="q" placeholder="Ketik nama/barcode..." />
+        <div id="searchResults" class="muted" style="margin-top:8px"></div>
+      </div>
+
+      <div class="card">
+        <div class="row">
+          <button id="btnExport">Export CSV Produk</button>
+          <button id="btnImport">Import CSV Produk</button>
+        </div>
+        <input id="fileImport" type="file" accept=".csv" style="display:none" />
+        <div class="muted">Format CSV: barcode,nama,harga,stok</div>
+      </div>
+    </section>
+
+    <!-- RIGHT: Keranjang + Pembayaran -->
+    <aside class="card">
+      <div style="font-weight:800;margin-bottom:8px">Keranjang</div>
+      <div style="overflow:auto;max-height:320px">
+        <table>
+          <thead>
+            <tr><th>Item</th><th>Qty</th><th>Subtotal</th></tr>
+          </thead>
+          <tbody id="cartBody"></tbody>
+        </table>
+      </div>
+
+      <div class="card" style="margin-top:10px">
+        <div class="row">
+          <div>
+            <div class="muted">Total</div>
+            <div style="font-size:22px;font-weight:800" id="total">Rp0</div>
+          </div>
+          <div>
+            <div class="muted">Diskon (Rp)</div>
+            <input id="discount" inputmode="numeric" placeholder="0" />
+          </div>
+        </div>
+
+        <div class="row" style="margin-top:8px">
+          <div>
+            <div class="muted">Bayar (Rp)</div>
+            <input id="paid" inputmode="numeric" placeholder="0" />
+          </div>
+          <div>
+            <div class="muted">Kembalian</div>
+            <div style="font-size:18px;font-weight:800" id="change">Rp0</div>
+          </div>
+        </div>
+
+        <div class="row" style="margin-top:10px">
+          <button id="btnCheckout" class="primary">Selesaikan Transaksi</button>
+          <button id="btnClearCart">Kosongkan</button>
+        </div>
+        <div class="muted" id="checkoutMsg" style="margin-top:8px"></div>
+      </div>
+
+      <div class="card" style="margin-top:10px">
+        <div style="font-weight:700;margin-bottom:6px">Riwayat (terakhir 10)</div>
+        <div id="history" class="muted"></div>
+      </div>
+    </aside>
+  </div>
+
+<script>
+/** ========= Local DB (localStorage) ========= */
+const DB_KEYS = {
+  products: 'kasir_products_v1',
+  history: 'kasir_history_v1'
+};
+
+function loadProducts(){
+  return JSON.parse(localStorage.getItem(DB_KEYS.products) || '[]');
+}
+function saveProducts(list){
+  localStorage.setItem(DB_KEYS.products, JSON.stringify(list));
+}
+function loadHistory(){
+  return JSON.parse(localStorage.getItem(DB_KEYS.history) || '[]');
+}
+function saveHistory(list){
+  localStorage.setItem(DB_KEYS.history, JSON.stringify(list));
+}
+
+function rupiah(n){
+  n = Number(n||0);
+  return 'Rp' + n.toLocaleString('id-ID');
+}
+
+function upsertProduct(p){
+  const products = loadProducts();
+  const idx = products.findIndex(x => x.barcode === p.barcode);
+  if(idx >= 0) products[idx] = { ...products[idx], ...p, updatedAt: Date.now() };
+  else products.push({ ...p, createdAt: Date.now(), updatedAt: Date.now() });
+  saveProducts(products);
+}
+
+function findByBarcode(code){
+  return loadProducts().find(p => p.barcode === code);
+}
+
+function searchProducts(query){
+  query = (query||'').toLowerCase().trim();
+  if(!query) return [];
+  return loadProducts().filter(p =>
+    (p.barcode||'').toLowerCase().includes(query) ||
+    (p.name||'').toLowerCase().includes(query)
+  ).slice(0, 20);
+}
+
+/** ========= Cart ========= */
+let cart = []; // {barcode, name, price, qty}
+
+function addToCart(product){
+  const idx = cart.findIndex(x => x.barcode === product.barcode);
+  if(idx >= 0) cart[idx].qty += 1;
+  else cart.push({ barcode: product.barcode, name: product.name, price: Number(product.price||0), qty: 1 });
+  renderCart();
+}
+
+function removeFromCart(barcode){
+  cart = cart.filter(x => x.barcode !== barcode);
+  renderCart();
+}
+
+function setQty(barcode, qty){
+  qty = Math.max(1, Number(qty||1));
+  const item = cart.find(x => x.barcode === barcode);
+  if(item){ item.qty = qty; renderCart(); }
+}
+
+function calcTotal(){
+  return cart.reduce((sum,it)=> sum + it.price * it.qty, 0);
+}
+
+function renderCart(){
+  const tbody = document.getElementById('cartBody');
+  tbody.innerHTML = '';
+  for(const it of cart){
+    const tr = document.createElement('tr');
+    const subtotal = it.price * it.qty;
+    tr.innerHTML = `
+      <td>
+        <div style="font-weight:700">${it.name}</div>
+        <div class="muted">${it.barcode} • ${rupiah(it.price)}</div>
+        <button class="danger" style="margin-top:6px;padding:6px 10px" onclick="removeFromCart('${it.barcode}')">Hapus</button>
+      </td>
+      <td>
+        <input value="${it.qty}" inputmode="numeric"
+               oninput="setQty('${it.barcode}', this.value)" />
+      </td>
+      <td style="font-weight:800">${rupiah(subtotal)}</td>
+    `;
+    tbody.appendChild(tr);
+  }
+
+  const total = calcTotal();
+  const discount = Number(document.getElementById('discount').value||0);
+  const payable = Math.max(0, total - discount);
+  document.getElementById('total').textContent = rupiah(payable);
+
+  const paid = Number(document.getElementById('paid').value||0);
+  const change = Math.max(0, paid - payable);
+  document.getElementById('change').textContent = rupiah(change);
+  renderHistory();
+}
+window.removeFromCart = removeFromCart;
+window.setQty = setQty;
+
+/** ========= Scanner (Quagga2) ========= */
+let scanning = false;
+
+async function startScanner(){
+  if(scanning) return;
+  scanning = true;
+  document.getElementById('checkoutMsg').textContent = '';
+  const viewport = document.getElementById('scannerViewport');
+  viewport.innerHTML = '<div class="muted">Memulai kamera...</div>';
+
+  Quagga.init({
+    inputStream: {
+      type: "LiveStream",
+      target: viewport,
+      constraints: {
+        facingMode: "environment",
+        width: { ideal: 1280 },
+        height: { ideal: 720 }
+      }
+    },
+    decoder: {
+      readers: ["ean_reader","ean_8_reader","upc_reader","upc_e_reader","code_128_reader"]
+    },
+    locate: true
+  }, function(err){
+    if(err){
+      viewport.innerHTML = '<div class="muted">Gagal akses kamera. Coba izinkan permission kamera di browser.</div>';
+      scanning = false;
+      return;
+    }
+    Quagga.start();
+  });
+
+  Quagga.onDetected(onDetected);
+}
+
+function stopScanner(){
+  if(!scanning) return;
+  scanning = false;
+  try{
+    Quagga.offDetected(onDetected);
+    Quagga.stop();
+  }catch(e){}
+  document.getElementById('scannerViewport').innerHTML = '<div class="muted">Scanner berhenti.</div>';
+}
+
+let lastCode = null;
+let lastAt = 0;
+
+function onDetected(result){
+  const code = result?.codeResult?.code;
+  if(!code) return;
+
+  const now = Date.now();
+  if(code === lastCode && (now - lastAt) < 1500) return; // anti double
+  lastCode = code; lastAt = now;
+
+  document.getElementById('pBarcode').value = code;
+
+  const p = findByBarcode(code);
+  if(p){
+    document.getElementById('pName').value = p.name || '';
+    document.getElementById('pPrice').value = p.price || '';
+    document.getElementById('pStock').value = p.stock ?? '';
+    addToCart(p);
+    document.getElementById('checkoutMsg').textContent = `✅ Ditambahkan: ${p.name}`;
+  }else{
+    document.getElementById('checkoutMsg').textContent =
+      `⚠️ Barcode ${code} belum ada. Isi nama & harga lalu klik "Simpan Produk".`;
+  }
+}
+
+/** ========= CSV Import/Export ========= */
+function exportCSV(){
+  const products = loadProducts();
+  const header = "barcode,nama,harga,stok\n";
+  const rows = products.map(p =>
+    `${csv(p.barcode)},${csv(p.name)},${csv(p.price)},${csv(p.stock ?? '')}`
+  ).join("\n");
+  const blob = new Blob([header + rows], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = "produk_kasir.csv";
+  a.click();
+  URL.revokeObjectURL(url);
+}
+function csv(v){
+  v = (v ?? '').toString().replaceAll('"','""');
+  return `"${v}"`;
+}
+function importCSV(file){
+  const reader = new FileReader();
+  reader.onload = () => {
+    const text = reader.result.toString();
+    const lines = text.split(/\r?\n/).filter(Boolean);
+    if(lines.length < 2) return;
+    const products = loadProducts();
+    const map = new Map(products.map(p => [p.barcode, p]));
+    for(let i=1;i<lines.length;i++){
+      const cols = parseCSVLine(lines[i]);
+      const barcode = (cols[0]||'').trim();
+      if(!barcode) continue;
+      map.set(barcode, {
+        barcode,
+        name: (cols[1]||'').trim(),
+        price: Number((cols[2]||'0').replace(/[^\d]/g,'')) || 0,
+        stock: cols[3] === undefined ? '' : Number((cols[3]||'').replace(/[^\d]/g,'')) || 0,
+        updatedAt: Date.now(),
+        createdAt: map.get(barcode)?.createdAt || Date.now()
+      });
+    }
+    saveProducts([...map.values()]);
+    document.getElementById('checkoutMsg').textContent = '✅ Import selesai.';
+    renderSearch();
+  };
+  reader.readAsText(file);
+}
+function parseCSVLine(line){
+  // minimal CSV parser for "quoted" values
+  const out = [];
+  let cur = '', inQ = false;
+  for(let i=0;i<line.length;i++){
+    const ch = line[i];
+    if(ch === '"' && line[i+1] === '"'){ cur += '"'; i++; continue; }
+    if(ch === '"'){ inQ = !inQ; continue; }
+    if(ch === ',' && !inQ){ out.push(cur); cur=''; continue; }
+    cur += ch;
+  }
+  out.push(cur);
+  return out;
+}
+
+/** ========= History ========= */
+function addHistory(entry){
+  const h = loadHistory();
+  h.unshift(entry);
+  saveHistory(h.slice(0, 50));
+}
+function renderHistory(){
+  const h = loadHistory().slice(0,10);
+  const el = document.getElementById('history');
+  if(!h.length){ el.textContent = 'Belum ada transaksi.'; return; }
+  el.innerHTML = h.map(x => {
+    const dt = new Date(x.at).toLocaleString('id-ID');
+    return `<div style="padding:6px 0;border-bottom:1px dashed #203040">
+      <div style="font-weight:700">${rupiah(x.total)} • ${x.items} item</div>
+      <div class="muted">${dt}</div>
+    </div>`;
+  }).join('');
+}
+
+/** ========= UI actions ========= */
+document.getElementById('btnStart').onclick = startScanner;
+document.getElementById('btnStop').onclick = stopScanner;
+
+document.getElementById('btnSaveProduct').onclick = () => {
+  const barcode = document.getElementById('pBarcode').value.trim();
+  const name = document.getElementById('pName').value.trim();
+  const price = Number((document.getElementById('pPrice').value||'0').replace(/[^\d]/g,'')) || 0;
+  const stockRaw = document.getElementById('pStock').value.trim();
+  const stock = stockRaw === '' ? '' : (Number(stockRaw.replace(/[^\d]/g,''))||0);
+
+  if(!barcode || !name){ document.getElementById('checkoutMsg').textContent = '⚠️ Barcode & nama wajib.'; return; }
+  upsertProduct({ barcode, name, price, stock });
+  document.getElementById('checkoutMsg').textContent = '✅ Produk disimpan.';
+  renderSearch();
+};
+
+document.getElementById('btnAddToCart').onclick = () => {
+  const barcode = document.getElementById('pBarcode').value.trim();
+  if(!barcode){ document.getElementById('checkoutMsg').textContent = '⚠️ Isi barcode dulu.'; return; }
+  const p = findByBarcode(barcode);
+  if(p) addToCart(p);
+  else document.getElementById('checkoutMsg').textContent = '⚠️ Produk belum tersimpan.';
+};
+
+document.getElementById('q').oninput = renderSearch;
+
+function renderSearch(){
+  const q = document.getElementById('q').value;
+  const results = searchProducts(q);
+  const el = document.getElementById('searchResults');
+  if(!q){ el.textContent = 'Ketik untuk mencari...'; return; }
+  if(!results.length){ el.textContent = 'Tidak ditemukan.'; return; }
+
+  el.innerHTML = results.map(p => `
+    <div style="padding:8px;border:1px solid #203040;border-radius:10px;margin-bottom:8px">
+      <div style="font-weight:800">${p.name}</div>
+      <div class="muted">${p.barcode} • ${rupiah(p.price)} • stok: ${p.stock ?? '-'}</div>
+      <div class="kiri" style="margin-top:6px">
+        <button onclick="fillProduct('${p.barcode}')">Pilih</button>
+        <button class="primary" onclick="quickAdd('${p.barcode}')">+ Keranjang</button>
+      </div>
+    </div>
+  `).join('');
+}
+window.fillProduct = (barcode) => {
+  const p = findByBarcode(barcode);
+  if(!p) return;
+  document.getElementById('pBarcode').value = p.barcode;
+  document.getElementById('pName').value = p.name || '';
+  document.getElementById('pPrice').value = p.price || '';
+  document.getElementById('pStock').value = p.stock ?? '';
+};
+window.quickAdd = (barcode) => {
+  const p = findByBarcode(barcode);
+  if(p) addToCart(p);
+};
+
+document.getElementById('discount').oninput = renderCart;
+document.getElementById('paid').oninput = renderCart;
+
+document.getElementById('btnClearCart').onclick = () => {
+  cart = [];
+  document.getElementById('paid').value = '';
+  document.getElementById('discount').value = '';
+  renderCart();
+  document.getElementById('checkoutMsg').textContent = 'Keranjang dikosongkan.';
+};
+
+document.getElementById('btnCheckout').onclick = () => {
+  const total = calcTotal();
+  const discount = Number(document.getElementById('discount').value||0);
+  const payable = Math.max(0, total - discount);
+  const paid = Number(document.getElementById('paid').value||0);
+
+  if(!cart.length){ document.getElementById('checkoutMsg').textContent = '⚠️ Keranjang kosong.'; return; }
+  if(paid < payable){ document.getElementById('checkoutMsg').textContent = '⚠️ Uang bayar kurang.'; return; }
+
+  addHistory({ at: Date.now(), total: payable, items: cart.reduce((s,x)=>s+x.qty,0) });
+  cart = [];
+  document.getElementById('paid').value = '';
+  document.getElementById('discount').value = '';
+  renderCart();
+  document.getElementById('checkoutMsg').textContent = '✅ Transaksi tersimpan.';
+};
+
+document.getElementById('btnExport').onclick = exportCSV;
+document.getElementById('btnImport').onclick = () => document.getElementById('fileImport').click();
+document.getElementById('fileImport').onchange = (e) => {
+  const file = e.target.files?.[0];
+  if(file) importCSV(file);
+  e.target.value = '';
+};
+
+document.getElementById('btnReset').onclick = () => {
+  localStorage.removeItem(DB_KEYS.products);
+  localStorage.removeItem(DB_KEYS.history);
+  cart = [];
+  seedDemo();
+  renderCart();
+  renderSearch();
+  document.getElementById('checkoutMsg').textContent = '🔄 Reset selesai.';
+};
+
+/** ========= Demo seed ========= */
+function seedDemo(){
+  const existing = loadProducts();
+  if(existing.length) return;
+  const demo = [
+    { barcode: '8999999999999', name: 'Air Mineral 600ml', price: 4000, stock: 50 },
+    { barcode: '8991111000000', name: 'Mi Instan', price: 3500, stock: 120 },
+    { barcode: '8992222000000', name: 'Kopi Sachet', price: 2000, stock: 200 }
+  ];
+  saveProducts(demo.map(x => ({...x, createdAt: Date.now(), updatedAt: Date.now()})));
+}
+
+seedDemo();
+renderCart();
+renderSearch();
+</script>
+</body>
+  </html>
