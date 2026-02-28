@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>TOKO ITA RENGASBANDUNG - POS</title>
+    <title>TOKO ITA RENGASBANDUNG - POS PRO</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/quagga/0.12.1/quagga.min.js"></script>
     <style>
@@ -73,11 +73,11 @@
             100% { top: 100%; }
         }
 
-        .tab-content { display: none; transition: all 0.3s ease; }
-        .tab-content.active { display: block; animation: fadeIn 0.4s ease; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; animation: fadeIn 0.3s ease-out; }
 
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
+            from { opacity: 0; transform: translateY(5px); }
             to { opacity: 1; transform: translateY(0); }
         }
 
@@ -93,12 +93,12 @@
 </head>
 <body class="min-h-screen flex flex-col pb-24">
 
-    <!-- Top Bar -->
+    <!-- Header Fungsional -->
     <header class="glass sticky top-0 z-[60] px-6 py-4 border-b border-slate-700/50">
         <div class="max-w-4xl mx-auto flex justify-between items-center">
             <div>
-                <p class="text-[10px] font-bold text-blue-400 tracking-[0.2em] uppercase">Point of Sale</p>
-                <h1 class="text-lg font-extrabold tracking-tight">TOKO ITA <span class="text-blue-500 text-sm font-medium">RENGASBANDUNG</span></h1>
+                <p class="text-[10px] font-bold text-blue-400 tracking-[0.2em] uppercase">Sistem Kasir v2.0</p>
+                <h1 class="text-lg font-extrabold tracking-tight uppercase">TOKO ITA <span class="text-blue-500 text-xs font-medium">Rengasbandung</span></h1>
             </div>
             <div id="clock" class="text-xs font-mono text-slate-400 bg-slate-900/50 px-3 py-1 rounded-full">00:00:00</div>
         </div>
@@ -106,29 +106,29 @@
 
     <main class="flex-grow p-4 max-w-4xl mx-auto w-full">
         
-        <!-- Dashboard Summary -->
-        <div id="dashboard-strip" class="grid grid-cols-2 gap-3 mb-6">
-            <div class="glass p-4 rounded-2xl">
-                <p class="text-[10px] text-slate-400 uppercase font-bold mb-1">Omzet Hari Ini</p>
+        <!-- Dashboard Real-time -->
+        <div class="grid grid-cols-2 gap-3 mb-6">
+            <div class="glass p-4 rounded-2xl border-l-4 border-green-500">
+                <p class="text-[10px] text-slate-400 uppercase font-bold mb-1">Total Omzet</p>
                 <h3 id="stat-omzet" class="text-xl font-black text-green-400">Rp 0</h3>
             </div>
-            <div class="glass p-4 rounded-2xl">
-                <p class="text-[10px] text-slate-400 uppercase font-bold mb-1">Transaksi</p>
+            <div class="glass p-4 rounded-2xl border-l-4 border-blue-500">
+                <p class="text-[10px] text-slate-400 uppercase font-bold mb-1">Transaksi Hari Ini</p>
                 <h3 id="stat-trx" class="text-xl font-black text-blue-400">0</h3>
             </div>
         </div>
 
-        <!-- Scanner Global Overlay -->
+        <!-- Scanner UI -->
         <div id="scanner-wrapper" class="hidden mb-6 glass rounded-3xl p-4 overflow-hidden relative border-2 border-blue-500/30">
             <div class="flex justify-between items-center mb-4">
                 <span class="flex items-center gap-2 text-sm font-bold">
-                    <span class="relative flex h-3 w-3">
+                    <span class="relative flex h-2 w-2">
                         <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-                        <span class="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
+                        <span class="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
                     </span>
-                    KAMERA AKTIF
+                    KAMERA SCANNER
                 </span>
-                <button onclick="toggleScanner()" class="bg-red-500/20 text-red-400 px-4 py-1.5 rounded-full text-xs font-bold">TUTUP</button>
+                <button onclick="toggleScanner()" class="bg-red-500/20 text-red-400 px-3 py-1 rounded-full text-[10px] font-bold">MATIKAN</button>
             </div>
             <div id="scanner-container" class="relative">
                 <div id="interactive" class="viewport"></div>
@@ -136,95 +136,90 @@
             </div>
         </div>
 
-        <!-- Tabs content -->
-        
-        <!-- 1. POS TAB -->
+        <!-- TAB POS (KASIR) -->
         <div id="tab-pos" class="tab-content active space-y-4">
             <div class="flex gap-2">
                 <div class="relative flex-grow">
-                    <input type="text" id="manual-barcode" placeholder="Scan atau ketik barcode..." class="w-full bg-slate-800/50 border border-slate-700 rounded-2xl px-5 py-4 text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all">
-                    <button onclick="toggleScanner('pos')" class="absolute right-3 top-1/2 -translate-y-1/2 p-2 bg-blue-600 rounded-xl text-white shadow-lg">
+                    <input type="text" id="manual-barcode" placeholder="Scan barcode produk..." class="w-full bg-slate-800/50 border border-slate-700 rounded-2xl px-5 py-4 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+                    <button onclick="toggleScanner('pos')" class="absolute right-3 top-1/2 -translate-y-1/2 p-2 bg-blue-600 rounded-xl text-white shadow-lg shadow-blue-600/30">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/><path d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/></svg>
                     </button>
                 </div>
-                <button onclick="manualAdd()" class="bg-slate-700 px-6 rounded-2xl font-bold text-sm">INPUT</button>
+                <button onclick="manualAdd()" class="bg-slate-700 px-6 rounded-2xl font-bold text-sm hover:bg-slate-600 transition-colors">CEK</button>
             </div>
 
             <div class="glass rounded-3xl overflow-hidden flex flex-col shadow-2xl">
-                <div class="p-5 border-b border-slate-700/50 flex justify-between items-center bg-slate-800/30">
+                <div class="p-5 border-b border-slate-700/50 flex justify-between items-center bg-slate-800/20">
                     <h2 class="font-bold flex items-center gap-2">
                         <svg class="w-5 h-5 text-blue-400" fill="currentColor" viewBox="0 0 20 20"><path d="M3 1a1 1 0 000 2h1.22l.305 1.222a.997.997 0 00.01.042l1.358 5.43-.893.892C3.74 11.846 4.632 14 6.414 14H15a1 1 0 100-2H6.414l1-1H14a1 1 0 00.894-.553l3-6A1 1 0 0017 3H6.28l-.31-1.243A1 1 0 005 1H3zM16 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM6.5 18a1.5 1.5 0 100-3 1.5 1.5 0 000 3z"></path></svg>
-                        Keranjang Belanja
+                        Daftar Belanja
                     </h2>
-                    <button onclick="clearCart()" class="text-xs text-red-400 font-bold hover:bg-red-500/10 px-3 py-1 rounded-full">KOSONGKAN</button>
+                    <button onclick="clearCart()" class="text-[10px] text-red-400 font-bold border border-red-400/30 px-3 py-1 rounded-full">HAPUS SEMUA</button>
                 </div>
                 
-                <div id="cart-items" class="min-h-[200px] max-h-[40vh] overflow-y-auto custom-scroll p-4 space-y-3">
-                    <div class="text-center text-slate-500 py-12 italic text-sm">Keranjang masih kosong</div>
+                <div id="cart-items" class="min-h-[250px] max-h-[45vh] overflow-y-auto custom-scroll p-4 space-y-3">
+                    <div class="text-center text-slate-500 py-16 italic text-sm">Scan barang untuk memulai...</div>
                 </div>
 
-                <div class="p-6 bg-slate-900/80 border-t border-slate-700/50 space-y-4">
-                    <div class="flex justify-between items-center">
-                        <span class="text-slate-400 text-sm">Diskon Manual</span>
-                        <div class="flex items-center gap-2 bg-slate-800 px-3 py-1 rounded-xl">
-                            <span class="text-xs text-slate-500 font-bold">Rp</span>
-                            <input type="number" id="discount-input" onchange="updateCartUI()" value="0" class="w-24 bg-transparent text-right text-sm font-bold outline-none">
-                        </div>
+                <div class="p-6 bg-slate-900/90 border-t border-slate-700/50 space-y-4">
+                    <div class="flex justify-between items-center text-sm font-bold">
+                        <span class="text-slate-500">POTONGAN (RP)</span>
+                        <input type="number" id="discount-input" onchange="updateCartUI()" value="0" class="w-24 bg-slate-800 border border-slate-700 rounded-xl px-3 py-1 text-right outline-none">
                     </div>
                     <div class="flex justify-between items-end">
                         <div>
-                            <p class="text-[10px] text-slate-500 font-black uppercase tracking-widest">Total Bayar</p>
-                            <h2 id="cart-total" class="text-3xl font-black text-blue-400 leading-none">Rp 0</h2>
+                            <p class="text-[10px] text-slate-500 font-black uppercase tracking-widest">Grand Total</p>
+                            <h2 id="cart-total" class="text-3xl font-black text-blue-400">Rp 0</h2>
                         </div>
                         <button onclick="openPaymentModal()" class="bg-blue-600 hover:bg-blue-500 px-8 py-4 rounded-2xl font-black text-sm shadow-xl shadow-blue-600/20 active:scale-95 transition-all">
-                            CHECKOUT
+                            BAYAR
                         </button>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- 2. INVENTORY TAB -->
+        <!-- TAB STOK (INVENTORY) -->
         <div id="tab-inventory" class="tab-content space-y-4">
             <div class="glass p-5 rounded-3xl border border-slate-700/50">
                 <div class="flex justify-between items-center mb-6">
-                    <h2 class="font-black text-lg">Database Produk</h2>
+                    <h2 class="font-black text-lg">Gudang Barang</h2>
                     <div class="flex gap-2">
-                        <button onclick="document.getElementById('csv-file').click()" class="p-2 bg-slate-800 rounded-xl text-slate-400"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/></svg></button>
-                        <input type="file" id="csv-file" accept=".csv" class="hidden" onchange="importCSV(this)">
-                        <button onclick="exportCSV()" class="p-2 bg-slate-800 rounded-xl text-slate-400"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/></svg></button>
+                        <button onclick="exportCSV()" class="p-2 bg-slate-800 rounded-xl text-slate-400" title="Download Excel/CSV"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/></svg></button>
+                        <button onclick="resetDataProduk()" class="p-2 bg-red-900/20 rounded-xl text-red-400" title="Reset Database"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/></svg></button>
                     </div>
                 </div>
 
                 <div class="space-y-3 bg-slate-900/50 p-4 rounded-2xl border border-slate-800 mb-6">
+                    <p class="text-[10px] font-bold text-slate-500 uppercase">Input Produk Baru</p>
                     <div class="flex gap-2">
                         <input type="text" id="p-barcode" placeholder="Barcode" class="flex-grow bg-slate-800 border border-slate-700 rounded-xl px-4 py-2 text-sm outline-none">
                         <button onclick="toggleScanner('inventory')" class="p-2 bg-blue-600/20 text-blue-400 rounded-xl"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/></svg></button>
                     </div>
-                    <input type="text" id="p-name" placeholder="Nama Produk" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2 text-sm outline-none">
+                    <input type="text" id="p-name" placeholder="Nama Barang" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2 text-sm outline-none">
                     <div class="grid grid-cols-2 gap-2">
-                        <input type="number" id="p-price" placeholder="Harga Jual" class="bg-slate-800 border border-slate-700 rounded-xl px-4 py-2 text-sm outline-none">
-                        <input type="number" id="p-stock" placeholder="Stok Awal" class="bg-slate-800 border border-slate-700 rounded-xl px-4 py-2 text-sm outline-none">
+                        <input type="number" id="p-price" placeholder="Harga" class="bg-slate-800 border border-slate-700 rounded-xl px-4 py-2 text-sm outline-none">
+                        <input type="number" id="p-stock" placeholder="Stok" class="bg-slate-800 border border-slate-700 rounded-xl px-4 py-2 text-sm outline-none">
                     </div>
-                    <button onclick="saveProduct()" class="w-full bg-blue-600 py-3 rounded-xl font-bold text-sm shadow-lg shadow-blue-600/10">TAMBAH PRODUK</button>
+                    <button onclick="saveProduct()" class="w-full bg-blue-600 py-3 rounded-xl font-bold text-sm shadow-lg shadow-blue-600/10 active:scale-95 transition-all">SIMPAN KE DATABASE</button>
                 </div>
 
-                <input type="text" id="search-product" onkeyup="renderInventory()" placeholder="Cari barang..." class="w-full mb-4 bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-sm outline-none">
-                <div id="product-list" class="space-y-2 max-h-[300px] overflow-y-auto custom-scroll"></div>
+                <input type="text" id="search-product" onkeyup="renderInventory()" placeholder="Cari di rak gudang..." class="w-full mb-4 bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-sm outline-none focus:border-blue-500">
+                <div id="product-list" class="space-y-2 max-h-[350px] overflow-y-auto custom-scroll"></div>
             </div>
         </div>
 
-        <!-- 3. HISTORY TAB -->
+        <!-- TAB RIWAYAT (HISTORY) -->
         <div id="tab-history" class="tab-content space-y-4">
             <div class="glass p-5 rounded-3xl">
-                <h2 class="font-black mb-4">Riwayat Penjualan</h2>
-                <div id="history-list" class="space-y-4"></div>
+                <h2 class="font-black mb-4 flex items-center gap-2">Riwayat Penjualan</h2>
+                <div id="history-list" class="space-y-3"></div>
             </div>
         </div>
 
     </main>
 
-    <!-- Navigation Bar -->
+    <!-- Navigation Fixed -->
     <nav class="fixed bottom-0 left-0 right-0 glass border-t border-white/5 px-6 py-4 z-50">
         <div class="max-w-md mx-auto flex justify-between items-center">
             <button onclick="switchTab('pos')" id="btn-pos" class="tab-btn p-3 rounded-2xl flex flex-col items-center gap-1 btn-active transition-all">
@@ -244,116 +239,106 @@
 
     <!-- Payment Modal -->
     <div id="payment-modal" class="fixed inset-0 bg-black/90 z-[100] hidden items-end sm:items-center justify-center">
-        <div class="bg-slate-800 w-full max-w-sm rounded-t-[3rem] sm:rounded-[3rem] p-8 border-t sm:border border-slate-700 shadow-2xl animate-fadeIn">
-            <div class="w-12 h-1.5 bg-slate-700 rounded-full mx-auto mb-6 sm:hidden"></div>
-            <h2 class="text-xl font-black mb-6 text-center">Pembayaran</h2>
-            
+        <div class="bg-slate-800 w-full max-w-sm rounded-t-[3rem] sm:rounded-[3rem] p-8 border-t border-slate-700 shadow-2xl">
+            <h2 class="text-xl font-black mb-6 text-center">Proses Bayar</h2>
             <div class="space-y-6">
                 <div class="bg-slate-900 p-6 rounded-[2rem] border border-blue-500/20 text-center">
-                    <p class="text-xs text-slate-500 font-bold uppercase tracking-widest mb-1">Total Harus Dibayar</p>
+                    <p class="text-[10px] text-slate-500 font-bold uppercase mb-1">Total Tagihan</p>
                     <div id="modal-total" class="text-3xl font-black text-blue-400">Rp 0</div>
                 </div>
-
                 <div>
-                    <div class="flex justify-between mb-2">
-                        <label class="text-xs text-slate-400 font-bold uppercase">Uang Tunai</label>
-                        <button onclick="setPayAmount('pas')" class="text-blue-400 text-[10px] font-black underline">UANG PAS</button>
-                    </div>
-                    <input type="number" id="pay-amount" oninput="calcChange()" placeholder="Masukkan jumlah..." class="w-full bg-slate-900 border-2 border-slate-700 rounded-2xl px-6 py-4 text-2xl font-black focus:border-blue-500 outline-none transition-all">
-                    
-                    <!-- Quick Cash Buttons -->
+                    <label class="text-xs text-slate-400 font-bold uppercase mb-2 block">Uang Konsumen</label>
+                    <input type="number" id="pay-amount" oninput="calcChange()" placeholder="0" class="w-full bg-slate-900 border-2 border-slate-700 rounded-2xl px-6 py-4 text-2xl font-black focus:border-blue-500 outline-none">
                     <div class="grid grid-cols-3 gap-2 mt-3">
-                        <button onclick="setPayAmount(10000)" class="bg-slate-700 py-2 rounded-xl text-xs font-bold">10rb</button>
-                        <button onclick="setPayAmount(20000)" class="bg-slate-700 py-2 rounded-xl text-xs font-bold">20rb</button>
-                        <button onclick="setPayAmount(50000)" class="bg-slate-700 py-2 rounded-xl text-xs font-bold">50rb</button>
-                        <button onclick="setPayAmount(100000)" class="bg-slate-700 py-2 rounded-xl text-xs font-bold">100rb</button>
-                        <button onclick="setPayAmount(150000)" class="bg-slate-700 py-2 rounded-xl text-xs font-bold">150rb</button>
-                        <button onclick="setPayAmount(200000)" class="bg-slate-700 py-2 rounded-xl text-xs font-bold">200rb</button>
+                        <button onclick="setPayAmount('pas')" class="bg-blue-600/20 text-blue-400 py-2 rounded-xl text-[10px] font-bold">PAS</button>
+                        <button onclick="setPayAmount(20000)" class="bg-slate-700 py-2 rounded-xl text-[10px] font-bold">20rb</button>
+                        <button onclick="setPayAmount(50000)" class="bg-slate-700 py-2 rounded-xl text-[10px] font-bold">50rb</button>
+                        <button onclick="setPayAmount(100000)" class="bg-slate-700 py-2 rounded-xl text-[10px] font-bold">100rb</button>
                     </div>
                 </div>
-
                 <div id="change-display" class="bg-green-500/10 p-5 rounded-2xl border border-green-500/30 hidden">
                     <div class="flex justify-between items-center">
                         <span class="text-xs text-green-400 font-bold uppercase">Kembalian</span>
                         <div id="modal-change" class="text-xl font-black text-white">Rp 0</div>
                     </div>
                 </div>
-
                 <div class="flex gap-4 pt-4">
                     <button onclick="closeModal('payment-modal')" class="flex-1 py-4 text-slate-500 font-bold">BATAL</button>
-                    <button id="finish-btn" disabled onclick="completeTransaction()" class="flex-[2] bg-blue-600 disabled:opacity-30 disabled:bg-slate-700 py-4 rounded-2xl font-black shadow-lg shadow-blue-600/20">PROSES</button>
+                    <button id="finish-btn" disabled onclick="completeTransaction()" class="flex-[2] bg-blue-600 disabled:opacity-30 disabled:bg-slate-700 py-4 rounded-2xl font-black">CETAK STRUK</button>
                 </div>
             </div>
         </div>
     </div>
 
     <!-- Receipt Modal -->
-    <div id="receipt-modal" class="fixed inset-0 bg-black/90 z-[110] hidden items-center justify-center p-4">
+    <div id="receipt-modal" class="fixed inset-0 bg-black/95 z-[110] hidden items-center justify-center p-4">
         <div class="bg-white text-slate-900 w-full max-w-xs rounded-2xl p-6 font-mono text-[11px] shadow-2xl relative">
-            <button onclick="closeModal('receipt-modal')" class="absolute -top-12 left-1/2 -translate-x-1/2 bg-white/20 text-white px-6 py-2 rounded-full font-bold">TUTUP</button>
+            <button onclick="closeModal('receipt-modal')" class="absolute -top-10 left-1/2 -translate-x-1/2 bg-white/20 text-white px-6 py-1 rounded-full text-[10px] font-bold">TUTUP</button>
             <div class="text-center border-b border-dashed border-slate-300 pb-4 mb-4">
-                <h2 class="text-sm font-black">TOKO ITA</h2>
+                <h2 class="text-sm font-black uppercase">TOKO ITA</h2>
                 <p>RENGASBANDUNG</p>
-                <p id="r-date"></p>
+                <p id="r-date" class="text-[9px]"></p>
             </div>
             <div id="r-items" class="space-y-1 mb-4"></div>
             <div class="border-t border-dashed border-slate-300 pt-2 space-y-1">
                 <div class="flex justify-between"><span>Subtotal:</span><span id="r-subtotal"></span></div>
                 <div class="flex justify-between text-red-600"><span>Diskon:</span><span id="r-discount"></span></div>
-                <div class="flex justify-between font-black text-[13px] border-t border-slate-200 mt-1 pt-1"><span>TOTAL:</span><span id="r-total"></span></div>
+                <div class="flex justify-between font-black text-[12px] border-t border-slate-200 mt-1 pt-1"><span>TOTAL:</span><span id="r-total"></span></div>
             </div>
-            <div class="mt-4 pt-4 border-t border-dashed border-slate-300 text-center">
-                <p>Terima Kasih Atas Kunjungan Anda!</p>
-                <p class="mt-2 text-[8px] text-slate-400">Powered by ITA-POS System</p>
+            <div class="mt-4 pt-4 border-t border-dashed border-slate-300 text-center italic">
+                <p>Terima Kasih!</p>
             </div>
-            <button onclick="copyReceipt()" class="w-full mt-4 bg-slate-100 py-2 rounded-lg font-bold text-slate-600">SALIN STRUK</button>
         </div>
     </div>
 
-    <!-- Feedback Toast -->
-    <div id="toast" class="fixed top-24 left-1/2 -translate-x-1/2 z-[200] px-6 py-3 rounded-2xl glass shadow-2xl transition-all duration-300 -translate-y-20 opacity-0 pointer-events-none border border-white/20">
-        <span id="toast-msg" class="text-sm font-bold"></span>
+    <!-- Toast -->
+    <div id="toast" class="fixed top-24 left-1/2 -translate-x-1/2 z-[200] px-6 py-3 rounded-2xl glass shadow-2xl transition-all duration-300 -translate-y-20 opacity-0 pointer-events-none border border-white/10">
+        <span id="toast-msg" class="text-xs font-bold"></span>
     </div>
 
     <script>
-        // --- DATA STATE ---
-        let products = JSON.parse(localStorage.getItem('ita_products')) || {};
-        let cart = [];
-        let history = JSON.parse(localStorage.getItem('ita_history')) || [];
-        let isScannerActive = false;
-        let lastScannedCode = null;
-        let lastScanTime = 0;
-        let scanContext = 'pos';
+        // --- PERSISTENCE ENGINE (KUNCI AGAR TIDAK RESET) ---
+        const DB_KEY = 'ita_v2_products';
+        const HIST_KEY = 'ita_v2_history';
 
-        // --- BEEP SOUND ENGINE ---
+        // Ambil data dari localStorage, jika tidak ada baru gunakan data awal
+        let products = JSON.parse(localStorage.getItem(DB_KEY));
+        let history = JSON.parse(localStorage.getItem(HIST_KEY)) || [];
+        let cart = [];
+
+        // HANYA isi data awal jika benar-benar kosong (pertama kali buka aplikasi)
+        if (!products || Object.keys(products).length === 0) {
+            products = {
+                "8991234567890": { barcode: "8991234567890", name: "Indomie Goreng", price: 3500, stock: 40 },
+                "8992345678901": { barcode: "8992345678901", name: "Aqua 600ml", price: 5000, stock: 24 }
+            };
+            saveToStorage();
+        }
+
+        function saveToStorage() {
+            localStorage.setItem(DB_KEY, JSON.stringify(products));
+            localStorage.setItem(HIST_KEY, JSON.stringify(history));
+        }
+
+        // --- AUDIO ---
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         function playBeep() {
             const osc = audioCtx.createOscillator();
             const gain = audioCtx.createGain();
-            osc.type = "sine";
-            osc.frequency.setValueAtTime(880, audioCtx.currentTime);
-            gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+            osc.frequency.setValueAtTime(950, audioCtx.currentTime);
             gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
-            osc.connect(gain);
-            gain.connect(audioCtx.destination);
-            osc.start();
-            osc.stop(audioCtx.currentTime + 0.1);
+            osc.connect(gain); gain.connect(audioCtx.destination);
+            osc.start(); osc.stop(audioCtx.currentTime + 0.1);
         }
 
-        const formatIDR = (num) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(num);
-
-        // --- NAVIGATION & CLOCK ---
-        setInterval(() => {
-            document.getElementById('clock').innerText = new Date().toLocaleTimeString('id-ID');
-        }, 1000);
+        // --- UTILS ---
+        const formatIDR = (n) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(n);
+        setInterval(() => { document.getElementById('clock').innerText = new Date().toLocaleTimeString('id-ID'); }, 1000);
 
         function switchTab(tab) {
             if (isScannerActive) toggleScanner();
             document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-            document.querySelectorAll('.tab-btn').forEach(b => {
-                b.classList.remove('btn-active');
-                b.classList.add('text-slate-500');
-            });
+            document.querySelectorAll('.tab-btn').forEach(b => { b.classList.remove('btn-active'); b.classList.add('text-slate-500'); });
             document.getElementById(`tab-${tab}`).classList.add('active');
             document.getElementById(`btn-${tab}`).classList.add('btn-active');
             document.getElementById(`btn-${tab}`).classList.remove('text-slate-500');
@@ -362,76 +347,55 @@
             updateDashboard();
         }
 
-        // --- SCANNER LOGIC ---
-        function toggleScanner(context = 'pos') {
+        // --- SCANNER ---
+        let isScannerActive = false;
+        let scanContext = 'pos';
+        let lastScanned = null;
+        let lastTime = 0;
+
+        function toggleScanner(ctx = 'pos') {
             const wrapper = document.getElementById('scanner-wrapper');
-            scanContext = context;
+            scanContext = ctx;
             if (!isScannerActive) {
                 wrapper.classList.remove('hidden');
                 Quagga.init({
-                    inputStream: { type: "LiveStream", target: document.querySelector('#interactive'), constraints: { facingMode: "environment" } },
+                    inputStream: { type: "LiveStream", target: "#interactive", constraints: { facingMode: "environment" } },
                     decoder: { readers: ["ean_reader", "upc_reader", "code_128_reader"] }
-                }, function (err) {
-                    if (err) { showToast("Kamera tidak ditemukan", "error"); wrapper.classList.add('hidden'); return; }
-                    Quagga.start();
-                    isScannerActive = true;
+                }, (err) => {
+                    if (err) { showToast("Kamera error", "error"); return; }
+                    Quagga.start(); isScannerActive = true;
                 });
                 Quagga.onDetected(handleDetected);
             } else {
-                Quagga.stop();
-                wrapper.classList.add('hidden');
-                isScannerActive = false;
+                Quagga.stop(); wrapper.classList.add('hidden'); isScannerActive = false;
             }
         }
 
-        function handleDetected(result) {
-            const code = result.codeResult.code;
-            const now = Date.now();
-            if (code === lastScannedCode && (now - lastScanTime < 1800)) return;
-            lastScannedCode = code;
-            lastScanTime = now;
+        function handleDetected(res) {
+            const code = res.codeResult.code;
+            if (code === lastScanned && (Date.now() - lastTime < 2000)) return;
+            lastScanned = code; lastTime = Date.now();
             playBeep();
-
-            if (scanContext === 'pos') {
-                processBarcode(code);
-            } else {
-                document.getElementById('p-barcode').value = code;
-                showToast(`Barcode: ${code}`);
-                toggleScanner();
-                document.getElementById('p-name').focus();
-            }
+            if (scanContext === 'pos') { processBarcode(code); } 
+            else { document.getElementById('p-barcode').value = code; toggleScanner(); }
         }
 
         function processBarcode(code) {
-            const product = products[code];
-            if (product) {
-                if (product.stock <= 0 && product.stock !== null && product.stock !== "") {
-                    showToast("Stok Habis!", "error");
-                    return;
-                }
-                addToCart(product);
-                showToast(`${product.name} (+)`);
+            const p = products[code];
+            if (p) {
+                if (p.stock !== null && p.stock <= 0) return showToast("Stok Habis!", "error");
+                addToCart(p); showToast(p.name + " ditambahkan");
             } else {
-                if (confirm(`Produk ${code} tidak ada. Daftarkan baru?`)) {
-                    switchTab('inventory');
-                    document.getElementById('p-barcode').value = code;
-                }
+                if (confirm("Produk belum terdaftar. Tambah baru?")) { switchTab('inventory'); document.getElementById('p-barcode').value = code; }
             }
         }
 
-        function manualAdd() {
-            const code = document.getElementById('manual-barcode').value.trim();
-            if (code) { processBarcode(code); document.getElementById('manual-barcode').value = ""; }
-        }
+        function manualAdd() { const c = document.getElementById('manual-barcode').value.trim(); if(c) { processBarcode(c); document.getElementById('manual-barcode').value = ""; } }
 
         // --- CART ---
-        function addToCart(product) {
-            const existing = cart.find(item => item.barcode === product.barcode);
-            if (existing) {
-                existing.qty++;
-            } else {
-                cart.push({ ...product, qty: 1 });
-            }
+        function addToCart(p) {
+            const exist = cart.find(i => i.barcode === p.barcode);
+            if (exist) exist.qty++; else cart.push({ ...p, qty: 1 });
             updateCartUI();
         }
 
@@ -443,153 +407,102 @@
             updateCartUI();
         }
 
+        function clearCart() { if(confirm("Hapus keranjang?")) { cart = []; updateCartUI(); } }
+
         function updateCartUI() {
-            const container = document.getElementById('cart-items');
-            const totalEl = document.getElementById('cart-total');
-            const discount = parseInt(document.getElementById('discount-input').value) || 0;
-
-            if (cart.length === 0) {
-                container.innerHTML = '<div class="text-center text-slate-500 py-12 italic text-sm">Keranjang masih kosong</div>';
-                totalEl.innerText = formatIDR(0);
-                return;
-            }
-
-            let subtotal = 0;
-            container.innerHTML = cart.map(item => {
-                subtotal += (item.price * item.qty);
+            const cont = document.getElementById('cart-items');
+            const disc = parseInt(document.getElementById('discount-input').value) || 0;
+            if (cart.length === 0) { cont.innerHTML = '<div class="text-center text-slate-500 py-16 italic text-sm">Scan barang untuk memulai...</div>'; document.getElementById('cart-total').innerText = "Rp 0"; return; }
+            let sub = 0;
+            cont.innerHTML = cart.map(i => {
+                sub += (i.price * i.qty);
                 return `
-                    <div class="flex items-center justify-between bg-slate-800/40 p-4 rounded-2xl border border-slate-700/50">
-                        <div class="flex-grow">
-                            <div class="text-sm font-bold text-slate-200">${item.name}</div>
-                            <div class="text-[10px] text-slate-500 font-bold">${formatIDR(item.price)}</div>
-                        </div>
-                        <div class="flex items-center gap-3">
-                            <div class="flex items-center bg-slate-900 rounded-xl overflow-hidden border border-slate-700">
-                                <button onclick="updateQty('${item.barcode}', -1)" class="w-8 h-8 hover:bg-slate-800 font-bold">-</button>
-                                <span class="px-3 text-xs font-black text-blue-400">${item.qty}</span>
-                                <button onclick="updateQty('${item.barcode}', 1)" class="w-8 h-8 hover:bg-slate-800 font-bold">+</button>
-                            </div>
+                <div class="flex items-center justify-between bg-slate-800/40 p-4 rounded-2xl border border-slate-700/50">
+                    <div class="flex-grow">
+                        <div class="text-xs font-bold">${i.name}</div>
+                        <div class="text-[10px] text-slate-500">${formatIDR(i.price)}</div>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <div class="flex items-center bg-slate-900 rounded-xl overflow-hidden">
+                            <button onclick="updateQty('${i.barcode}',-1)" class="w-8 h-8 font-bold">-</button>
+                            <span class="px-2 text-xs font-mono text-blue-400">${i.qty}</span>
+                            <button onclick="updateQty('${i.barcode}',1)" class="w-8 h-8 font-bold">+</button>
                         </div>
                     </div>
-                `;
+                </div>`;
             }).join('');
-
-            totalEl.innerText = formatIDR(Math.max(0, subtotal - discount));
+            document.getElementById('cart-total').innerText = formatIDR(Math.max(0, sub - disc));
         }
 
-        function clearCart() { if (confirm("Kosongkan keranjang?")) { cart = []; updateCartUI(); } }
-
-        // --- PAYMENT & CHECKOUT ---
+        // --- PAYMENT ---
         function openPaymentModal() {
-            if (cart.length === 0) return showToast("Keranjang kosong!", "error");
-            const totalStr = document.getElementById('cart-total').innerText.replace(/[^0-9]/g, '');
-            document.getElementById('modal-total').innerText = formatIDR(parseInt(totalStr));
+            if (cart.length === 0) return;
+            const t = parseInt(document.getElementById('cart-total').innerText.replace(/[^0-9]/g, ''));
+            document.getElementById('modal-total').innerText = formatIDR(t);
             document.getElementById('pay-amount').value = "";
             document.getElementById('change-display').classList.add('hidden');
-            document.getElementById('finish-btn').disabled = true;
             document.getElementById('payment-modal').classList.replace('hidden', 'flex');
-            setTimeout(() => document.getElementById('pay-amount').focus(), 300);
         }
 
         function closeModal(id) { document.getElementById(id).classList.replace('flex', 'hidden'); }
 
         function setPayAmount(val) {
-            const total = parseInt(document.getElementById('modal-total').innerText.replace(/[^0-9]/g, ''));
-            if (val === 'pas') {
-                document.getElementById('pay-amount').value = total;
-            } else {
-                const current = parseInt(document.getElementById('pay-amount').value) || 0;
-                document.getElementById('pay-amount').value = current + val;
-            }
+            const t = parseInt(document.getElementById('modal-total').innerText.replace(/[^0-9]/g, ''));
+            if (val === 'pas') document.getElementById('pay-amount').value = t;
+            else document.getElementById('pay-amount').value = (parseInt(document.getElementById('pay-amount').value) || 0) + val;
             calcChange();
         }
 
         function calcChange() {
-            const total = parseInt(document.getElementById('modal-total').innerText.replace(/[^0-9]/g, ''));
-            const pay = parseInt(document.getElementById('pay-amount').value) || 0;
-            const btn = document.getElementById('finish-btn');
-            if (pay >= total) {
+            const t = parseInt(document.getElementById('modal-total').innerText.replace(/[^0-9]/g, ''));
+            const p = parseInt(document.getElementById('pay-amount').value) || 0;
+            if (p >= t) {
                 document.getElementById('change-display').classList.remove('hidden');
-                document.getElementById('modal-change').innerText = formatIDR(pay - total);
-                btn.disabled = false;
+                document.getElementById('modal-change').innerText = formatIDR(p-t);
+                document.getElementById('finish-btn').disabled = false;
             } else {
                 document.getElementById('change-display').classList.add('hidden');
-                btn.disabled = true;
+                document.getElementById('finish-btn').disabled = true;
             }
         }
 
         function completeTransaction() {
-            const discount = parseInt(document.getElementById('discount-input').value) || 0;
-            const subtotal = cart.reduce((acc, item) => acc + (item.price * item.qty), 0);
-            const total = subtotal - discount;
+            const disc = parseInt(document.getElementById('discount-input').value) || 0;
+            const sub = cart.reduce((a,c) => a + (c.price*c.qty), 0);
+            const tot = sub - disc;
             const pay = parseInt(document.getElementById('pay-amount').value);
 
-            // Update Stok
+            // Update Stok di memori dan SIMPAN ke Storage
             cart.forEach(item => {
                 if (products[item.barcode]) {
-                    if (products[item.barcode].stock !== null && products[item.barcode].stock !== "") {
+                    if (products[item.barcode].stock !== null) {
                         products[item.barcode].stock -= item.qty;
                     }
                 }
             });
-            localStorage.setItem('ita_products', JSON.stringify(products));
 
             const trx = {
                 id: "TRX-" + Date.now(),
                 date: new Date().toLocaleString('id-ID'),
-                items: [...cart],
-                subtotal, discount, total, pay,
-                change: pay - total
+                items: [...cart], sub, disc, tot, pay, change: pay-tot
             };
 
             history.unshift(trx);
-            localStorage.setItem('ita_history', JSON.stringify(history.slice(0, 100)));
+            saveToStorage(); // <--- KUNCI AGAR TIDAK RESET
             
             showReceipt(trx);
-            cart = [];
-            document.getElementById('discount-input').value = 0;
-            updateCartUI();
+            cart = []; updateCartUI();
             closeModal('payment-modal');
             updateDashboard();
-            showToast("Transaksi Selesai!");
         }
 
-        // --- DASHBOARD STATS ---
-        function updateDashboard() {
-            const today = new Date().toLocaleDateString('id-ID');
-            const todayTrx = history.filter(t => t.date.includes(today));
-            const omzet = todayTrx.reduce((acc, curr) => acc + curr.total, 0);
-            
-            document.getElementById('stat-omzet').innerText = formatIDR(omzet);
-            document.getElementById('stat-trx').innerText = todayTrx.length;
-        }
-
-        // --- RECEIPT VIEW ---
         function showReceipt(trx) {
             document.getElementById('r-date').innerText = trx.date;
-            document.getElementById('r-subtotal').innerText = formatIDR(trx.subtotal);
-            document.getElementById('r-discount').innerText = formatIDR(trx.discount);
-            document.getElementById('r-total').innerText = formatIDR(trx.total);
-            
-            document.getElementById('r-items').innerHTML = trx.items.map(i => `
-                <div class="flex justify-between">
-                    <span class="max-w-[150px] truncate">${i.name} x${i.qty}</span>
-                    <span>${formatIDR(i.price * i.qty)}</span>
-                </div>
-            `).join('');
-            
+            document.getElementById('r-subtotal').innerText = formatIDR(trx.sub);
+            document.getElementById('r-discount').innerText = formatIDR(trx.disc);
+            document.getElementById('r-total').innerText = formatIDR(trx.tot);
+            document.getElementById('r-items').innerHTML = trx.items.map(i => `<div class="flex justify-between"><span>${i.name} x${i.qty}</span><span>${formatIDR(i.price*i.qty)}</span></div>`).join('');
             document.getElementById('receipt-modal').classList.replace('hidden', 'flex');
-        }
-
-        function copyReceipt() {
-            const text = document.getElementById('r-items').innerText + "\nTotal: " + document.getElementById('r-total').innerText;
-            const textArea = document.createElement("textarea");
-            textArea.value = text;
-            document.body.appendChild(textArea);
-            textArea.select();
-            document.execCommand('copy');
-            document.body.removeChild(textArea);
-            showToast("Teks struk disalin!");
         }
 
         // --- INVENTORY ---
@@ -598,92 +511,70 @@
             const n = document.getElementById('p-name').value.trim();
             const p = parseInt(document.getElementById('p-price').value);
             const s = document.getElementById('p-stock').value;
-
-            if (!b || !n || isNaN(p)) return showToast("Mohon lengkapi data", "error");
-
-            products[b] = { barcode: b, name: n, price: p, stock: s !== "" ? parseInt(s) : null };
-            localStorage.setItem('ita_products', JSON.stringify(products));
-            
-            ["p-barcode", "p-name", "p-price", "p-stock"].forEach(id => document.getElementById(id).value = "");
+            if (!b || !n || isNaN(p)) return showToast("Data tidak valid", "error");
+            products[b] = { barcode: b, name: n, price: p, stock: s === "" ? null : parseInt(s) };
+            saveToStorage(); // <--- KUNCI AGAR TIDAK RESET
+            ["p-barcode","p-name","p-price","p-stock"].forEach(id => document.getElementById(id).value = "");
             renderInventory();
-            showToast("Produk disimpan");
+            showToast("Produk tersimpan aman");
         }
 
         function renderInventory() {
-            const container = document.getElementById('product-list');
+            const cont = document.getElementById('product-list');
             const q = document.getElementById('search-product').value.toLowerCase();
             const filtered = Object.values(products).filter(p => p.name.toLowerCase().includes(q) || p.barcode.includes(q));
-
-            container.innerHTML = filtered.map(p => `
-                <div class="flex items-center justify-between bg-slate-800/50 p-4 rounded-2xl border border-slate-700/50">
-                    <div>
-                        <div class="text-sm font-bold text-slate-200">${p.name}</div>
-                        <div class="text-[9px] text-slate-500 font-mono">${p.barcode}</div>
-                    </div>
-                    <div class="flex items-center gap-4">
-                        <div class="text-right">
-                            <div class="text-xs font-black text-blue-400">${formatIDR(p.price)}</div>
-                            <div class="text-[9px] ${p.stock < 5 ? 'text-red-400 animate-pulse' : 'text-slate-500'} font-bold">Stok: ${p.stock === null ? '∞' : p.stock}</div>
-                        </div>
-                        <button onclick="deleteProduct('${p.barcode}')" class="p-2 text-slate-600 hover:text-red-500 transition-colors"><svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"></path></svg></button>
-                    </div>
+            cont.innerHTML = filtered.map(p => `
+            <div class="flex items-center justify-between bg-slate-800/40 p-4 rounded-2xl border border-slate-700/50">
+                <div><div class="text-xs font-bold">${p.name}</div><div class="text-[9px] font-mono text-slate-500">${p.barcode}</div></div>
+                <div class="text-right">
+                    <div class="text-xs font-black text-blue-400">${formatIDR(p.price)}</div>
+                    <div class="text-[9px] ${p.stock <= 5 ? 'text-red-400 font-black animate-pulse' : 'text-slate-500 font-bold'}">Stok: ${p.stock ?? '∞'}</div>
                 </div>
-            `).join('');
+            </div>`).join('');
         }
 
-        function deleteProduct(b) { if (confirm("Hapus produk ini?")) { delete products[b]; localStorage.setItem('ita_products', JSON.stringify(products)); renderInventory(); } }
+        function resetDataProduk() {
+            if (confirm("⚠️ Hapus SEMUA produk dan stok?")) {
+                products = {}; saveToStorage(); renderInventory(); showToast("Database dikosongkan");
+            }
+        }
+
+        // --- DASHBOARD ---
+        function updateDashboard() {
+            const today = new Date().toLocaleDateString('id-ID');
+            const todayTrx = history.filter(h => h.date.includes(today));
+            document.getElementById('stat-omzet').innerText = formatIDR(todayTrx.reduce((a,c)=>a+c.tot, 0));
+            document.getElementById('stat-trx').innerText = todayTrx.length;
+        }
 
         function renderHistory() {
-            const container = document.getElementById('history-list');
-            if (history.length === 0) { container.innerHTML = '<div class="text-center py-10 text-slate-500 italic">Belum ada transaksi</div>'; return; }
-            container.innerHTML = history.slice(0, 20).map(trx => `
-                <div onclick='showReceipt(${JSON.stringify(trx)})' class="bg-slate-800/30 p-4 rounded-2xl border border-slate-700/50 flex justify-between items-center cursor-pointer hover:bg-slate-700/30 transition-all">
-                    <div>
-                        <div class="text-xs font-black text-slate-400">${trx.id}</div>
-                        <div class="text-[10px] text-slate-500">${trx.date}</div>
-                    </div>
-                    <div class="text-right">
-                        <div class="text-sm font-black text-green-400">${formatIDR(trx.total)}</div>
-                        <div class="text-[9px] text-slate-500">${trx.items.length} item</div>
-                    </div>
-                </div>
-            `).join('');
+            const cont = document.getElementById('history-list');
+            if (history.length === 0) { cont.innerHTML = '<div class="text-center py-10 text-slate-500 italic">Belum ada riwayat</div>'; return; }
+            cont.innerHTML = history.slice(0, 15).map(h => `
+            <div class="bg-slate-900/50 p-4 rounded-2xl border border-slate-800 flex justify-between items-center">
+                <div><div class="text-[10px] font-bold text-slate-400">${h.id}</div><div class="text-[9px] text-slate-600">${h.date}</div></div>
+                <div class="text-right font-black text-green-400 text-xs">${formatIDR(h.tot)}</div>
+            </div>`).join('');
         }
 
-        function showToast(msg, type = "success") {
-            const t = document.getElementById('toast');
-            document.getElementById('toast-msg').innerText = msg;
-            document.getElementById('toast-msg').className = type === "success" ? "text-green-400 text-xs font-bold" : "text-red-400 text-xs font-bold";
-            t.classList.remove('-translate-y-20', 'opacity-0');
-            setTimeout(() => t.classList.add('-translate-y-20', 'opacity-0'), 2500);
+        function showToast(m, t="success") {
+            const toast = document.getElementById('toast');
+            document.getElementById('toast-msg').innerText = m;
+            document.getElementById('toast-msg').className = t === "success" ? "text-green-400 text-xs font-bold" : "text-red-400 text-xs font-bold";
+            toast.classList.remove('-translate-y-20', 'opacity-0');
+            setTimeout(() => toast.classList.add('-translate-y-20', 'opacity-0'), 2500);
         }
 
         function exportCSV() {
-            const csv = "barcode,nama,harga,stok\n" + Object.values(products).map(p => `${p.barcode},${p.name},${p.price},${p.stock}`).join("\n");
+            const csv = "Barcode,Nama,Harga,Stok\n" + Object.values(products).map(p => `${p.barcode},${p.name},${p.price},${p.stock}`).join("\n");
             const link = document.createElement("a");
             link.href = "data:text/csv;charset=utf-8," + encodeURI(csv);
-            link.download = `TOKO_ITA_DB_${Date.now()}.csv`;
-            link.click();
+            link.download = `DB_TOKO_ITA_${Date.now()}.csv`; link.click();
         }
 
-        function importCSV(input) {
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                const lines = e.target.result.split('\n').slice(1);
-                lines.forEach(l => {
-                    const [b, n, p, s] = l.split(',');
-                    if (b && n && !isNaN(p)) products[b.trim()] = { barcode: b.trim(), name: n.trim(), price: parseInt(p), stock: s ? parseInt(s) : null };
-                });
-                localStorage.setItem('ita_products', JSON.stringify(products));
-                renderInventory();
-                showToast("Data Diimpor!");
-            };
-            reader.readAsText(input.files[0]);
-        }
-
-        // Init
+        // Jalankan awal
         updateDashboard();
         renderInventory();
     </script>
 </body>
-              </html>
+</html>
